@@ -1,10 +1,10 @@
 <template>
-  <v-layout 
-    row 
+  <v-layout
+    row
     justify-center>
-    <v-dialog 
-      v-model="dialog" 
-      persistent 
+    <v-dialog
+      v-model="dialog"
+      persistent
       max-width="500px">
       <v-card>
         <v-card-title>
@@ -13,12 +13,12 @@
         <v-card-text>
           <v-container grid-list-md>
             <form>
-              <v-layout 
-                row 
+              <v-layout
+                row
                 wrap>
-                <v-flex 
-                  v-for="(f, index) in fillable" 
-                  :key="index" 
+                <v-flex
+                  v-for="(f, index) in fillable"
+                  :key="index"
                   xs12>
                   <label>{{ f.caption }}</label>
                   <v-text-field
@@ -31,17 +31,17 @@
 
                   />
                 </v-flex>
-              </v-layout>     
+              </v-layout>
             </form>
           </v-container>
         </v-card-text>
         <v-card-actions>
           <v-spacer/>
-          <v-btn 
-            color="primary" 
+          <v-btn
+            color="primary"
             @click.native="onClose">Tutup</v-btn>
-          <v-btn 
-            color="primary" 
+          <v-btn
+            color="primary"
             @click.native="submit">Simpan</v-btn>
         </v-card-actions>
       </v-card>
@@ -51,7 +51,6 @@
 <script>
 import { global } from '~/mixins'
 import { STUDY_NAME_URL } from '~/utils/apis'
-import axios from 'axios'
 import catchError, { showNoty } from '~/utils/catchError'
 export default {
   $_veeValidate: {
@@ -101,9 +100,7 @@ export default {
       try {
         this.activateLoader()
         this.formData.role_id = 4
-        const resp = await axios
-          .post(STUDY_NAME_URL, this.formData)
-          .then(res => res.data)
+        const resp = await this.$axios.$post(STUDY_NAME_URL, this.formData)
         if (resp.meta.status === 201) {
           this.formData = {}
           showNoty('Data disimpan', 'success')

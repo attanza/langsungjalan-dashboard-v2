@@ -1,10 +1,10 @@
 <template>
-  <v-layout 
-    row 
+  <v-layout
+    row
     justify-center>
-    <v-dialog 
-      v-model="dialog" 
-      persistent 
+    <v-dialog
+      v-model="dialog"
+      persistent
       max-width="500px">
       <v-card>
         <v-card-title>
@@ -13,12 +13,12 @@
         <v-card-text>
           <v-container grid-list-md>
             <form>
-              <v-layout 
-                row 
+              <v-layout
+                row
                 wrap>
-                <v-flex 
-                  v-for="(f, index) in fillable" 
-                  :key="index" 
+                <v-flex
+                  v-for="(f, index) in fillable"
+                  :key="index"
                   xs12>
                   <div v-if="!inArray(notIncluded, f.key)">
                     <label>{{ f.caption }}</label>
@@ -29,10 +29,11 @@
                       :name="f.key"
                       :data-vv-name="f.key"
                       :data-vv-as="f.caption"
+                      :type="f.key === 'password' ? 'password' : 'text'"
                     />
                   </div>
                   <div v-if="f.key == 'roles' && comboData">
-                    <label>Role</label>                
+                    <label>Role</label>
                     <v-autocomplete
                       v-validate="'required|numeric'"
                       :items="comboData"
@@ -56,17 +57,17 @@
                     />
                   </div>
                 </v-flex>
-              </v-layout>     
+              </v-layout>
             </form>
           </v-container>
         </v-card-text>
         <v-card-actions>
           <v-spacer/>
-          <v-btn 
-            color="primary" 
+          <v-btn
+            color="primary"
             @click.native="onClose">Tutup</v-btn>
-          <v-btn 
-            color="primary" 
+          <v-btn
+            color="primary"
             @click.native="submit">Simpan</v-btn>
         </v-card-actions>
       </v-card>
@@ -76,7 +77,6 @@
 <script>
 import { global } from '~/mixins'
 import { USER_URL, COMBO_DATA_URL } from '~/utils/apis'
-import axios from 'axios'
 import catchError, { showNoty } from '~/utils/catchError'
 export default {
   $_veeValidate: {
@@ -148,8 +148,8 @@ export default {
     },
     async getRoles() {
       try {
-        let roles = await axios.get(COMBO_DATA_URL + 'Role')
-        if (roles) this.$store.commit('comboData', roles.data)
+        let roles = await this.$axios.$get(COMBO_DATA_URL + 'Role')
+        if (roles) this.$store.commit('comboData', roles)
       } catch (e) {
         catchError(e)
       }
@@ -171,10 +171,7 @@ export default {
     async saveData() {
       try {
         this.activateLoader()
-        const resp = await axios
-          .post(USER_URL, this.formData)
-          .then(res => res.data)
-
+        const resp = await this.$axios.$post(USER_URL, this.formData)
         if (resp.meta.status === 201) {
           showNoty('Data disimpan', 'success')
           this.$emit('onAdd', resp.data)

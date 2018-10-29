@@ -1,9 +1,17 @@
 <template>
   <div>
+    <h2 class="primary--text mb-3">{{ title }}</h2>
     <v-card class="pt-3">
       <v-toolbar
         card
         color="transparent">
+        <Tbtn
+          :bottom="true"
+          :tooltip-text="'Tambah ' + title "
+          icon-mode
+          color="primary"
+          icon="add"
+          @onClick="showForm = true"/>
         <Tbtn
           :bottom="true"
           :tooltip-text="'Download ' + title + ' data'"
@@ -11,6 +19,7 @@
           color="primary"
           icon="cloud_download"
           @onClick="downloadData"/>
+
         <v-spacer/>
         <v-text-field
           v-model="pagination.search"
@@ -33,52 +42,63 @@
         <template
           slot="items"
           slot-scope="props">
-          <td>{{ props.item.ip }}</td>
-          <td>{{ props.item.browser }}</td>
-          <td>{{ props.item.activity }}</td>
-          <td>{{ props.item.created_at }}</td>
-          <!-- <td class="justify-center layout px-0">
-            <v-btn icon class="mx-0" @click="toDetail(props.item)">
-              <Tbtn :tooltip-text="'Show '+title" icon-mode flat color="white" icon="remove_red_eye" @onClick="toDetail(props.item)"/>
+          <td>{{ props.item.name }}</td>
+          <td>{{ props.item.description }}</td>
+          <td class="justify-center layout px-0">
+            <v-btn
+              icon
+              class="mx-0"
+              @click="toDetail(props.item)">
+              <Tbtn
+                :tooltip-text="'Detail '+title"
+                icon-mode
+                flat
+                color="primary"
+                icon="remove_red_eye"
+                @onClick="toDetail(props.item)"/>
             </v-btn>
-          </td> -->
+          </td>
         </template>
       </v-data-table>
     </v-card>
+    <dform
+      :show="showForm"
+      @onClose="showForm = false"
+      @onAdd="addData"/>
     <DownloadDialog
       :show-dialog="showDownloadDialog"
       :data-to-export="dataToExport"
       :fillable="fillable"
       :type-dates="typeDates"
-      :query="`user_id=${user.id}`"
-      model="Activity"
+      model="StudyName"
       @onClose="showDownloadDialog = false"/>
 
   </div>
 </template>
 <script>
 import debounce from 'lodash/debounce'
-import { ACTIVITIES_URL } from '~/utils/apis'
+import { STUDY_NAME_URL } from '~/utils/apis'
 import { global } from '~/mixins'
+import { dform } from '~/components/study-names'
 import catchError from '~/utils/catchError'
 import DownloadDialog from '~/components/DownloadDialog'
 
 export default {
   middleware: 'auth',
-  components: { DownloadDialog },
+  components: { dform, DownloadDialog },
   mixins: [global],
   data: () => ({
-    title: 'Aktivitas',
+    title: 'Nama Studi',
     headers: [
-      { text: 'IP Address', align: 'left', value: 'ip' },
-      { text: 'Browser', align: 'left', value: 'browser' },
-      { text: 'Activity', align: 'left', value: 'activity' },
-      { text: 'Created', align: 'left', value: 'created_at' }
-      // { text: "Actions", value: "name", sortable: false }
+      { text: 'Nama', align: 'left', value: 'name' },
+      { text: 'Deskripsi', align: 'left', value: 'description' },
+      { text: 'Aksi', value: '', align: 'center', sortable: false }
     ],
     items: [],
+    confirmMessage: 'Yakin mau menghapus ?',
+    showConfirm: false,
     dataToExport: [],
-    fillable: ['id', 'ip', 'browser', 'activity', 'created_at'],
+    fillable: ['id', 'name', 'description'],
     typeDates: ['created_at']
   }),
 
@@ -101,9 +121,8 @@ export default {
         this.activateLoader()
         this.loading = true
         const { descending, sortBy } = this.pagination
-        const endPoint = `${ACTIVITIES_URL}?${this.getQueryParams()}user_id=${
-          this.currentEdit.id
-        }`
+        const endPoint = `${STUDY_NAME_URL}?${this.getQueryParams()}`
+
         const res = await this.$axios.$get(endPoint)
         this.items = res.data
         this.totalItems = res.meta.total
@@ -126,28 +145,20 @@ export default {
         this.loading = false
         this.deactivateLoader()
       } catch (e) {
-        console.log('e', e)
-        this.loading = false
-        this.showForm = false
         this.deactivateLoader()
         catchError(e)
       }
     },
     toDetail(data) {
-      this.$router.push(`/users/${data.id}`)
+      this.$router.push(`/study-names/${data.id}`)
+    },
+    addData(data) {
+      this.items.unshift(data)
+      this.showForm = false
     },
     downloadData() {
       this.dataToExport = []
-      let localItems = this.items
-      localItems.map(i => {
-        let user = ''
-        let data = Object.assign({}, i)
-        delete data.user
-        delete data.user_id
-        if (i.user) user = i.user.name
-        data.user = user
-        this.dataToExport.push(data)
-      })
+      this.dataToExport = this.items
       if (this.dataToExport.length) {
         this.showDownloadDialog = true
       }

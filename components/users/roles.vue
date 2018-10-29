@@ -2,8 +2,8 @@
   <div>
     <v-card>
       <v-container fluid>
-        <v-toolbar 
-          color="transparent" 
+        <v-toolbar
+          color="transparent"
           card>
           <v-text-field
             v-model="search"
@@ -13,57 +13,57 @@
             hide-details
           />
           <v-spacer/>
-          <Tbtn 
-            color="primary" 
-            icon="chevron_left" 
-            icon-mode 
-            tooltip-text="Kembali" 
+          <Tbtn
+            color="primary"
+            icon="chevron_left"
+            icon-mode
+            tooltip-text="Kembali"
             @onClick="toHome"/>
-          <Tbtn 
-            color="primary" 
-            icon="save" 
-            icon-mode 
-            tooltip-text="Simpan" 
-            @onClick="showDialog = true"/>              
+          <Tbtn
+            color="primary"
+            icon="save"
+            icon-mode
+            tooltip-text="Simpan"
+            @onClick="showDialog = true"/>
 
-          <Tbtn 
-            color="primary" 
-            tooltip-text="Tandai sama" 
-            icon-mode 
-            icon="check_box" 
+          <Tbtn
+            color="primary"
+            tooltip-text="Tandai sama"
+            icon-mode
+            icon="check_box"
             @onClick="selectAll"/>
-          <Tbtn 
-            color="primary" 
-            tooltip-text="Tidak ditandai semua" 
-            icon-mode 
-            icon="check_box_outline_blank" 
-            @onClick="clearAll"/> 
+          <Tbtn
+            color="primary"
+            tooltip-text="Tidak ditandai semua"
+            icon-mode
+            icon="check_box_outline_blank"
+            @onClick="clearAll"/>
         </v-toolbar>
         <v-card-text>
-          <v-layout 
-            v-if="items" 
-            row 
+          <v-layout
+            v-if="items"
+            row
             wrap>
-            <v-flex 
-              v-for="role in items" 
-              :key="role.id" 
-              md3 
-              sm4 
+            <v-flex
+              v-for="role in items"
+              :key="role.id"
+              md3
+              sm4
               xs6>
-              <v-checkbox 
-                v-model="rolesArray" 
-                :label="role.name" 
-                :value="role.id" 
+              <v-checkbox
+                v-model="rolesArray"
+                :label="role.name"
+                :value="role.id"
                 color="primary"/>
             </v-flex>
           </v-layout>
         </v-card-text>
       </v-container>
     </v-card>
-    <Dialog 
-      :showDialog="showDialog" 
-      text="Yakin akan diperbaharui ?" 
-      @onClose="showDialog = false" 
+    <Dialog
+      :showDialog="showDialog"
+      text="Yakin akan diperbaharui ?"
+      @onClose="showDialog = false"
       @onConfirmed="attachRoles"/>
   </div>
 </template>
@@ -71,7 +71,6 @@
 <script>
 import { global } from '~/mixins'
 import { USER_URL } from '~/utils/apis'
-import axios from 'axios'
 import Dialog from '~/components/Dialog'
 import catchError, { showNoty } from '~/utils/catchError'
 import debounce from 'lodash/debounce'
@@ -132,9 +131,10 @@ export default {
           address: this.currentEdit.address,
           roles: this.rolesArray
         }
-        const resp = await axios
-          .put(USER_URL + '/' + this.currentEdit.id, formData)
-          .then(res => res.data)
+        const resp = await this.$axios.$put(
+          USER_URL + '/' + this.currentEdit.id,
+          formData
+        )
         this.$store.commit('currentEdit', resp.data)
         showNoty('Data disimpan', 'success')
         this.showDialog = false

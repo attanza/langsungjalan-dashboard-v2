@@ -1,10 +1,10 @@
 <template>
-  <v-layout 
-    row 
+  <v-layout
+    row
     justify-center>
-    <v-dialog 
-      v-model="dialog" 
-      persistent 
+    <v-dialog
+      v-model="dialog"
+      persistent
       max-width="600px">
       <v-card>
         <v-card-title>
@@ -13,13 +13,13 @@
         <v-card-text>
           <v-container grid-list-md>
             <form>
-              <v-layout 
-                row 
-                wrap 
+              <v-layout
+                row
+                wrap
                 class="mt-3 px-2">
-                <v-flex 
-                  v-for="(f, index) in fillable" 
-                  :key="index" 
+                <v-flex
+                  v-for="(f, index) in fillable"
+                  :key="index"
                   xs12>
                   <div v-if="!inArray(notIncluded, f.key)">
                     <label>{{ f.caption }}</label>
@@ -34,7 +34,7 @@
                     />
                   </div>
                   <div v-if="f.key == 'study_name_id' && comboData2">
-                    <label>Nama Studi</label>                
+                    <label>Nama Studi</label>
                     <v-autocomplete
                       v-validate="'required|numeric'"
                       :items="comboData2"
@@ -50,7 +50,7 @@
                     />
                   </div>
                   <div v-if="f.key == 'university_id' && comboData">
-                    <label>Universitas</label>                
+                    <label>Universitas</label>
                     <v-autocomplete
                       v-validate="'required|numeric'"
                       :items="comboData"
@@ -77,17 +77,17 @@
                     />
                   </div>
                 </v-flex>
-              </v-layout>      
+              </v-layout>
             </form>
           </v-container>
         </v-card-text>
         <v-card-actions>
           <v-spacer/>
-          <v-btn 
-            color="primary" 
+          <v-btn
+            color="primary"
             @click.native="onClose">Tutup</v-btn>
-          <v-btn 
-            color="primary" 
+          <v-btn
+            color="primary"
             @click.native="submit">Simpan</v-btn>
         </v-card-actions>
       </v-card>
@@ -97,7 +97,6 @@
 <script>
 import { global } from '~/mixins'
 import { STUDIES_URL, COMBO_DATA_URL } from '~/utils/apis'
-import axios from 'axios'
 import catchError, { showNoty } from '~/utils/catchError'
 export default {
   $_veeValidate: {
@@ -161,10 +160,10 @@ export default {
   async created() {
     try {
       this.setAuth()
-      let resp = await axios.get(COMBO_DATA_URL + 'University')
-      if (resp) this.$store.commit('comboData', resp.data)
-      let resp2 = await axios.get(COMBO_DATA_URL + 'StudyName')
-      if (resp2) this.$store.commit('comboData2', resp2.data)
+      let resp = await this.$axios.$get(COMBO_DATA_URL + 'University')
+      if (resp) this.$store.commit('comboData', resp)
+      let resp2 = await this.$axios.$get(COMBO_DATA_URL + 'StudyName')
+      if (resp2) this.$store.commit('comboData2', resp2)
       this.setFields()
       this.setYears()
     } catch (e) {
@@ -197,9 +196,7 @@ export default {
     async saveData() {
       try {
         this.activateLoader()
-        const resp = await axios
-          .post(STUDIES_URL, this.formData)
-          .then(res => res.data)
+        const resp = await this.$axios.$post(STUDIES_URL, this.formData)
         if (resp.meta.status === 201) {
           showNoty('Data disimpan', 'success')
           this.$emit('onAdd', resp.data)
